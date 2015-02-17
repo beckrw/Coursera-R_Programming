@@ -1,23 +1,37 @@
-## This function will return the mean of the specified pollutant
-## across all monitors (ignoring NA values)
-
 pollutantmean <- function(directory, pollutant, id = 1:332) {
-  # create character vector of filenames based on passed id
-  datafiles <- c()
-  datafiles <- c(datafiles, paste(directory, "/", formatC(id, width=3, flag="0"), ".csv", sep=""))
-  
-  # read all files specified above
-  my_data <- lapply(datafiles, read.csv)
-  my_data <- do.call(rbind, my_data)
-  
-  #display sulfate or nitrate mean
-  if (pollutant == colnames(my_data)[2]) {
-    sulfate <- mean(my_data[,2], na.rm = TRUE)
-    sulfate <- round(sulfate, digits = 3)
-    return(sulfate)
-  } else {
-    nitrate <- mean(my_data[,3], na.rm = TRUE)
-    nitrate <- round(nitrate, digits = 3)
-    return(nitrate) 
-  }       
+
+## 'directory' is a character vector of length 1 indicating
+## the location of the CSV files
+## 'pollutant' is a character vector of length 1 indicating
+## the name of the pollutant for which we will calculate the
+## mean; either "sulfate" or "nitrate".
+## 'id' is an integer vector indicating the monitor ID numbers
+## to be used
+## Return the mean of the pollutant across all monitors list
+## in the 'id' vector (ignoring NA values)
+
+Aggr_Sample 	<- c()
+
+for(id_curr in id) {
+	if(id_curr <= 9) {
+		ID_As_Str 		<- paste('00', id_curr, sep='')	
+	} else if(id_curr <= 99) {
+		ID_As_Str 		<- paste('0', id_curr, sep='')
+	} else {
+		ID_As_Str 		<- paste(id_curr)
+	}
+
+	File_Path 		<- paste(directory, '/', ID_As_Str, '.csv', sep='')
+	Data 			<- read.csv(File_Path, header=T)
+	Variable 		<- Data[pollutant] 
+	Aggr_Sample 	<- c(Aggr_Sample, Variable[!is.na(Variable)])
+}
+
+Mean_Pollutant 	<- mean(Aggr_Sample)
+
+cat(paste('\nThe mean value of ', pollutant, ' is ', Mean_Pollutant, '.\n\n', sep=''))
+
+Mean_Pollutant
+
+
 }
